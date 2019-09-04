@@ -68,20 +68,44 @@ server.post('/api/users', (req, res) => {
 //Updates the user with the specified id using data from the request body. Returns the modified document, NOT the original.
 server.put('/api/users/:id', (req, res) => {
 
-  const userId = req.params.id; // fetchs user's ID.
+  const id = req.params.id; // fetchs user's ID.
   const update = req.body; // Adds the update made to the user.
+  const name = req.body.name // fetchs updated name of user. 
 
-  userDatabase.update(userId, update)
+  userDatabase.update(id, update)
     .then(update => {
       res.status(200).json({
         message: "User updated sucessfully",
-        update: update
+        id: id,
+        name: name
       })
     })
     .catch( err => {
       error: "There was an error updating user, make sure it includes name"
     })
 
+})
+// <------------------------------------------------------------------------- DELETE REQUESTS ----------------
+//Removes the post with the specified id and returns the deleted post object.
+server.delete('/api/users/:id', (req, res) => {
+
+    const id = req.params.id; // fetchs user id;
+
+    userDatabase.remove(id)
+      .then(user => {
+        if(user){
+          res.status(200).json({
+            message: "User has been deleted sucessfully"
+          })
+        }else{
+          res.status(404).json({
+            error: "User does not exist"
+          })
+        }
+      })
+      .catch(err => res.status(500).json({
+        error: "User could not be removed"
+      }))
 })
 
 //add your middleware used globally here
