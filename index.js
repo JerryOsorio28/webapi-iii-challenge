@@ -27,7 +27,7 @@ function logger(req, res, next) {
 // }
 
 // <------------------------------------------------------------------------- GET REQUESTS ----------------
-//Returns an array of all the post objects contained in the database.
+//Returns an array of all the users objects contained in the database.
 server.get('/api/users', (req, res) => {
   userDatabase.get()
   .then( posts => res.status(200).json(posts))
@@ -45,6 +45,16 @@ server.get('/api/users/:id', (req, res) => {
     .then( user => res.status(200).json(user))
     .catch(err => res.status(500).json({
       message: "The user info couldn't be retrieved",
+    }))
+})
+
+//Returns an array of all the posts objects contained in the database.
+server.get('/api/posts/', (req, res) => {
+
+  postsDatabase.get()
+    .then( user => res.status(200).json(user))
+    .catch(err => res.status(500).json({
+      message: "The posts info couldn't be retrieved",
     }))
 })
 //<------------------------------------------------------------------------- POST REQUESTS ----------------
@@ -110,12 +120,6 @@ server.delete('/api/users/:id', (req, res) => {
 
 //add your middleware used globally here
 server.use(logger)
-
-
-server.get('/', (req, res) => {
-    res.send(`<h2>Let's write some middleware!</h2>`)
-  });
-
 
 
 //Log in which port our server is listening for traffic
