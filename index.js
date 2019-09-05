@@ -21,6 +21,25 @@ function logger(req, res, next) {
     )
     next();
   };
+
+  //Verifies the users, if it matches, the returns the body request, if not displays and error.
+function validateUser(req, res, next) {
+    if(req.url === `/api/users/`){
+      next();
+    }else{
+      res.send('Missing user data')
+    }
+  };
+
+  //Verifies the user's id, if it matches, the returns the body request, if not displays and error.
+function validatePost(req, res, next) {
+    if(req.body === `/api/posts`){
+      next();
+    }else{
+      res.send("missing required text field")
+    }
+  };
+
   //Verifies the user's id, if it matches, the returns the body request, if not displays and error.
 function validateUserId(req, res, next) {
     if(req.url === `/api/users/1`){
@@ -52,7 +71,7 @@ server.get('/api/users/:id', validateUserId, (req, res) => {
 })
 
 //Returns an array of all the POSTS objects contained in the database.
-server.get('/api/posts/', (req, res) => {
+server.get('/api/posts/', validateUser, (req, res) => {
 
   postsDatabase.get()
     .then( post => res.status(200).json(post))
@@ -62,7 +81,7 @@ server.get('/api/posts/', (req, res) => {
 })
 
 //Return an individual post of a user by ID
-server.get('/api/posts/:id', (req, res) => {
+server.get('/api/posts/:id', validateUserId, validatePost, (req, res) => {
 
   const id = req.params.id // fetchs post's ID.
 
@@ -82,7 +101,7 @@ server.get('/api/posts/:id', (req, res) => {
 })
 //<------------------------------------------------------------------------- POST REQUESTS ----------------
 //Creates a user using the information sent inside the request body.
-server.post('/api/users', (req, res) => {
+server.post('/api/users', validateUser, (req, res) => {
 
       const newUser = req.body;
 
