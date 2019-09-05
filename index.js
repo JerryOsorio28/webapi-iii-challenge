@@ -21,13 +21,16 @@ function logger(req, res, next) {
     )
     next();
   };
-
-// function validateUserId (req, res, next){
-//   if(req.url === '/')
-// }
-
-// <------------------------------------------------------------------------- GET REQUESTS ----------------
-//Returns an array of all the users objects contained in the database.
+  //Verifies the user's id, if it matches, the returns the body request, if not displays and error.
+function validateUserId(req, res, next) {
+    if(req.url === `/api/users/1`){
+      next();
+    }else{
+      res.send('Incorrect ID')
+    }
+  };
+//<------------------------------------------------------------------------- GET REQUESTS ----------------
+//Returns an array of all the USERS objects contained in the database.
 server.get('/api/users', (req, res) => {
   userDatabase.get()
   .then( posts => res.status(200).json(posts))
@@ -37,7 +40,7 @@ server.get('/api/users', (req, res) => {
 })
 
 //Returns the user object with the specified id.
-server.get('/api/users/:id', (req, res) => {
+server.get('/api/users/:id', validateUserId, (req, res) => {
 
     const userId = req.params.id; //fetchs user ID.
 
@@ -48,13 +51,33 @@ server.get('/api/users/:id', (req, res) => {
     }))
 })
 
-//Returns an array of all the posts objects contained in the database.
+//Returns an array of all the POSTS objects contained in the database.
 server.get('/api/posts/', (req, res) => {
 
   postsDatabase.get()
-    .then( user => res.status(200).json(user))
+    .then( post => res.status(200).json(post))
     .catch(err => res.status(500).json({
       message: "The posts info couldn't be retrieved",
+    }))
+})
+
+//Return an individual post of a user by ID
+server.get('/api/posts/:id', (req, res) => {
+
+  const id = req.params.id // fetchs post's ID.
+
+  postsDatabase.getById(id)
+    .then( post => {
+      if(post){
+        res.status(200).json(post)
+      }else{
+        res.status(404).json({
+          error: `User does not have ${id} posts yet`
+        })
+      }
+    })
+    .catch(err => res.status(500).json({
+      message: "The post info couldn't be retrieved",
     }))
 })
 //<------------------------------------------------------------------------- POST REQUESTS ----------------
@@ -72,6 +95,25 @@ server.post('/api/users', (req, res) => {
         })
         .catch(err => res.status(500).json({
           error: "Please provide at least a name to the user"
+        }))
+})
+//Creates a post using the information sent inside the request body.
+server.post('/api/users/:id/posts', (req, res) => {
+
+  const newPost = req.body;
+  let postId = req.params.id;
+  let id = postId++;
+
+      postsDatabase.insert(newPost)
+        .then(newPost => {
+          res.status(201).json({
+            message: "Post created successfully",
+            newPost: newPost,
+            id: id
+          })
+        })
+        .catch(err => res.status(500).json({
+          error: "Please provide at least a text in the text field"
         }))
 })
 // <------------------------------------------------------------------------- PUT REQUESTS ----------------
