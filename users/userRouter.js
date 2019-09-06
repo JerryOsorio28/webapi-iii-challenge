@@ -1,17 +1,19 @@
-const express = 'express';
+const express = require('express');
 
 //importing userDatabase
-const userDatabase = require('./users/userDb');
+const userDatabase = require('./userDb.js');
 //importing postDatabase
-const postsDatabase = require('./posts/postDb');
+const postsDatabase = require('../posts/postDb');
 
 const router = express.Router();
 
   //<------------------------------------------------------------------------- POST REQUESTS ----------------
   //Creates a user using the information sent inside the request body.
   router.post('/', validateUser, (req, res) => {
+
+    const user = req.body;
   
-    userDatabase.insert({name})
+    userDatabase.insert(user)
       .then(user => {
         res.status(201).json({
           message: "User created successfully",
@@ -61,7 +63,7 @@ router.get('/:id', validateUserId, (req, res) => {
 
 router.get('/:id/posts', validateUserId, (req, res) => {
   
-    const { id } = req.body; //fetch post ID from body
+    const { id } = req.params; //fetch post ID from body
   
         userDatabase.getUserPosts(id)
           .then(posts => {
@@ -75,7 +77,7 @@ router.get('/:id/posts', validateUserId, (req, res) => {
   })
 // <------------------------------------------------------------------------- DELETE REQUESTS ----------------
   //Removes the post with the specified id and returns the deleted post object.
-  router.delete('/api/users/:id', validateUserId, (req, res) => {
+  router.delete('/:id', validateUserId, (req, res) => {
   
     const { id } = req.params; // fetchs user id;
 
@@ -138,7 +140,7 @@ function validateUser(req, res, next) {
     if(!name){
         return res.status(400).json({ error: "Name required"})
     }
-    if(name !== 'string'){
+    if(typeof name !== 'string'){
         return res.status(400).json({ error: "Name must be a string"})
     }
     req.body = { name }
@@ -148,12 +150,7 @@ function validateUser(req, res, next) {
 function validatePost(req, res, next) {
     const { id: user_id } = req.params;
     const { text } = req.body;
-
-    if(!req.body){
-        return res.status(400).json({
-            error: "Post requires body"
-        })
-    }
+    
     if(!text){
         return res.status(400).json({
             error: "Post requires text"
